@@ -1,0 +1,44 @@
+第五周作业
+李能鹏 地测学院 地理信息科学 2020904207
+本周学习力第二阶段第一章和第二章有关于递归实现归并排序的算法，以及对递归算法改进的方法和思路。归并排序算法的时间复杂度是Ο(nlogn)级别的；但是对一个完全有有序的序列，排序则是Ο(n)级别的算法；对于量级较小的序列，可以使用插入排序法对归排序进行优化；普遍的归并排序算法是自顶而下进行，但是也可以进行自底向上的进行排序。
+
+归并排序
+#include <iostream>
+#include<vector>
+using namespace std;
+
+void merge(vector<int>& arr, int l, int mid, int r) {
+    int i = l, j = mid+1;
+    vector<int> temp(arr.size());
+    int k = 0;
+    while (i <= mid && j <= r) {
+        if (arr[i] <= arr[j]) {
+            temp[k++] = arr[i++];
+        }
+        else {
+            temp[k++] = arr[j++];
+        }
+    }
+    while (i <= mid)  temp[k++] = arr[i++];
+    while (j <= r)  temp[k++] = arr[j++];
+    for (int i = 0; i < k; i++) {
+        arr[l + i] = temp[i];
+    }
+}
+
+void MergeSort(vector<int>& arr, int l, int r) {
+    if (l < r) {
+        int mid = (l + r) / 2;
+        MergeSort(arr, l, mid);
+        MergeSort(arr, mid + 1, r);
+        merge(arr, l, mid, r);
+    }
+}
+
+int main() {
+    vector<int> arr = {5,10,6,34,21,58,26,67,35,45,16,23,2,9,43 };
+    MergeSort(arr, 0, arr.size() - 1);
+    for (int i = 0; i < arr.size(); i++)
+        cout << arr[i] << " ";
+    return 0;
+}
