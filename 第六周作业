@@ -1,0 +1,170 @@
+第六周作业
+李能鹏 地测学院 地理信息科学 2020904207
+本周学习第二阶段有关于递归实现快速排序的算法，以及对快速排序算法改进的方法和思路。
+1）快速排序可以利用新开辟的空间进行排序，但考虑到节约空间，可原地进行排序；2）对于快速排序，数组长度较小时，可利用插入排序进行优化；3）简单快速排序对于完全有序的数组进行排序的时间复杂度是Ο(n2)，进行的递归深度是Ο(n)，可以加入随机化的方法对快速排序进行优化；4|）对于数组中的元素完全相同时，随机化也不能解决问题，这时可使用双路快速排序；5）快速排序算法的时间复杂度是Ο(nlogn)级别的；6）还可以使用三路快速排序算法对二路快速排序算法进行改进。
+
+快速排序
+//QuickSort.h
+#pragma once
+#include<iostream>
+template <class T>
+class QuickSort
+{
+public:
+	QuickSort() {}
+	//简单快速排序
+	void sort(T* arr, int length) {
+		int r = length;
+		return sort(arr, 0, r);
+	}
+	//双路快速排序
+	void sort2ways(T* arr, int length) {
+		int r = length;
+		return sort2ways(arr, 0, r);
+	}
+	//三路快速排序
+	void sort3ways(T* arr, int length) {
+		int r = length;
+		return sort3ways(arr, 0, r);
+	}
+private:
+	//简单快速排序
+	void sort(T* arr,int l,int r) {
+		if (l >= r)
+			return;
+		int p = partition(arr, l, r);
+		sort(arr, l, p - 1);
+		sort(arr, p + 1, r);
+	}
+	int partition(T* arr, int l, int r) {
+		//生成[l,r]之间的随机索引
+		int p = l + rand() % (r - l + 1) + 0;
+		swap(arr, l, p);
+		//arr[l+1...j]<v;arr[j+1...i]>v
+		int j = l;
+		for(int i=l+1;i<=r;i++)
+			if (arr[i] < arr[l]) {
+				j++;
+				swap(arr, i, j);
+			}
+		swap(arr, l, j);
+		return j;
+	}
+	//双路快速排序
+	void sort2ways(T* arr, int l, int r) {
+		if (l >= r)
+			return;
+		int p = partition2(arr, l, r);
+		sort2ways(arr, l, p - 1);
+		sort2ways(arr, p + 1, r);
+	}
+	int partition2(T* arr, int l, int r) {
+		//生成[l,r]之间的随机索引
+		int p = l + rand() % (r - l + 1) + 0;
+		swap(arr, l, p);
+		//arr[l+1...i-1]<=v;arr[j+1...r]>=v
+		int i = l + 1, j = r;
+		while (true) {
+			while (i <= j && arr[i] < arr[l])
+				i++;
+			while (j >= i && arr[j] > arr[l])
+				j--;
+			if (i >= j)
+				break;
+			swap(arr, i, j);
+			i++;
+			j--;
+		}
+		swap(arr, l, j);
+		return j;
+	}
+	//三路快速排序
+	void sort3ways(T* arr, int l, int r) {
+		if (l >= r)
+			return;
+		//生成[l,r]之间的随机索引
+		int p = l + rand() % (r - l + 1) + 0;
+		swap(arr, l, p);
+		//arr[l+1,lt]<v;arr[lt+1,i-1]==v;arr[gt,r]>v
+		int lt = l, i = l + 1, gt = r + 1;
+		while (i < gt) {
+			if (arr[i] < arr[l]) {
+				lt++;
+				swap(arr, i, lt);
+				i++;
+			}
+			else if (arr[i] > arr[l]) {
+				gt--;
+				swap(arr, i, gt);
+			}
+			else {
+				//arr[i]==arr[l]
+				i++;
+			}
+		}
+		swap(arr, l, lt);
+		sort3ways(arr, l, lt - 1);
+		sort3ways(arr, gt, r);
+	}
+
+
+	//交换函数
+	void swap(T* arr, int i, int j) {
+		T t = arr[i];
+		arr[i] = arr[j];
+		arr[j] = t;
+	}
+};
+
+
+//shuzushengchengqi.h
+#include<iostream>
+#pragma once
+class shuzushengchengqi {
+public:
+	int* szscq(int n) {
+		p= new int[n];
+		for (int i = 0; i < n; i++) {
+			p[i] = rand() % 100 + 1;
+		}
+		return p;
+	}
+	~shuzushengchengqi() {
+		delete[]p;
+	}
+private:
+	int* p;
+};
+
+
+//main
+#include <iostream>
+#include"QuickSort.h"
+#include"shuzushengchengqi.h"
+using namespace std;
+int main() 
+{
+    int n;
+    cout << "请输入所需数组的长度：";
+    cin >> n;
+    cout << endl;
+    shuzushengchengqi s;
+    int *arr=s.szscq(n);
+    for (int i = 0; i < n; i++) {
+        if (i % 10 == 0 && i > 0)
+            cout << endl;
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    for (int i = 0; i < 20; i++)
+        cout << "//";
+    cout << endl;
+    QuickSort<int> p;
+    p.sort3ways(arr,n-1);
+    for (int i = 0; i < n; i++) {
+        if (i % 10 == 0 && i > 0)
+            cout << endl;
+        cout << arr[i] << " ";
+    }
+    return 0;
+}
