@@ -1,0 +1,128 @@
+第八周作业
+李能鹏
+本周学习第二阶段有关于二分搜索树的动态数据结构。
+二分搜索树是在二叉树基础上所建立的一种动态数据结构，其相对链表在时间复杂度上有极大的优势；对于树结构而言，递归形式相对来讲较为好理解和编写，二分搜索树的添加，查询，前序、中序、后序、层序遍历，以及删除最大的元素和最小的元素，乃至任意元素的递归实现方法及原理。
+
+二分搜索树
+#pragma once
+template <typename T>
+class BST
+{ 
+public:
+	BST() {
+		root = null;
+		size = 0;
+	}
+	int size() {
+		return size;
+	}
+	bool isEmpty() {
+		return size == 0;
+	}
+	//向二分搜索树中添加新的元素e
+	void add(T e) {
+		if (root == null) {
+			root = new Node(e);
+			size++;
+		}
+		else
+			add(root, e);
+	}
+	void add2(T e) {
+		root = add2(root, e);
+	}
+	//看二分搜索树中是否包含元素e
+	bool contains(T e) {
+		return contains(root, e);
+	}
+	//从二分搜索树中删除元素为e的节点
+	void remove(T e) {
+		return remove(root, e);
+	}
+private:
+	class Node {
+	public:
+		T e;
+		Node left, right;
+		Node(T e) {
+			this->e = e;
+			left = null;
+			right = null;
+		}
+	//向以node为根的二分搜索树插入元素e，递归算法
+	void add(Node node, T e) {
+		if (e == node.e)
+			return;
+		if (e < node.e && node.left == null) {
+			node.left == new Node(e);
+			size++;
+			return;
+		}
+		if (e > node.e && node.right == null) {
+			node.right = new Node(e);
+			size++;
+			return;
+		}
+		if (e < node.e)
+			add(node.left, e);
+		else                    //e > node.e
+			add(node.right, e);
+	}
+	//返回插入新节点后二分搜索树的根
+	void add2(Node node,T e){
+		if (node == null) {
+			size++;
+			return new Node(e); 
+		}
+		if (e < node.e)
+			node.left = add2(node.left, e);
+		if (e > node.e)
+			node.right = add2(node.right, e);
+		return node;
+	}
+	//看node为根的二分搜索树中是否包含元素e，递归算法
+	bool contains(Node node, T e) {
+		if (node == null)
+			return false;
+		if (e == node.e)
+			return true;
+		if (e < node.e)
+			return contains(node.left, e);
+		else
+			return contains(node.right, e);
+	}
+	Node remove(Node node, T e) {
+		if (node == null)
+			return null;
+		if (e < node.e) {
+			node.left = remove(node.left, e);
+			return node;
+		}
+		if (e > node.e) {
+			node.right = remove(node.right, e);
+			return node;
+		}
+		else {
+			if (node.left == null) {
+				Node rightNode = node.right;
+				node.right = null;
+				size--;
+				return rightNode;
+			}
+			if (node.right == null) {
+				Node leftNode = node.left;
+				node.left = null;
+				size--;
+				return leftNode;
+			}
+		}
+	}
+	/*~BST() {
+		delete[]root;
+		delete[]node.left;
+		delete[]node.right;
+	}*/
+	Node root;
+	int size;
+	};
+};
