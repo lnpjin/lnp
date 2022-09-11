@@ -1,0 +1,370 @@
+李能鹏
+本周学习有关于基于二分搜索树和链表的集合和映射。
+集合是不具有重复元素的数据结构；映射对应于python语言中的字典，键和其所对应的值。
+基于二分搜索树的集合平均时间复杂度为Ο(logn)，基于链表的集合时间复杂度为Ο(n)；
+基于二分搜索树的映射平均时间复杂度为Ο(logn)，基于链表的映射时间复杂度为Ο(n)。
+
+二分搜索树
+#include"BST.h"
+#include "LinkedList.h"
+template <class T>
+class Set {
+public:
+	virtual int size() = 0;
+	virtual bool isEmpty() = 0;
+	//增加操作
+	virtual void add(T num) = 0;
+	//删除操作
+	virtual void remove(T num) = 0;
+	//查找操作
+	virtual bool contains(T num) = 0;
+};
+
+
+
+//基于二分搜索树的集合
+template <class T>
+class BSTSet : public Set<T> {
+public:
+	int size() {
+		return bst.size();
+	}
+	bool isEmpty() {
+		return bst.isEmpty();
+	}
+	//增加操作
+	void add(T num) {
+		bst.add(num);
+	}
+	//删除操作
+	void remove(T num) {
+		bst.remove(num);
+	}
+	//查找操作
+	bool contains(T num) {
+		return bst.contains(num);
+	}
+private:
+	BST<T> bst;
+};
+
+
+
+//基于链表的集合
+template <class T>
+class LinkedListSet : public Set<T> {
+public:
+	int size() {
+		return list.size();
+	}
+	bool isEmpty() {
+		return list.isEmpty();
+	}
+	//增加操作
+	void add(T num) {
+		if (!list.contains(num)) {
+			list.addFirst(num);
+		}
+	}
+	//删除操作
+	void remove(T num) {
+		while (list.contains(num)) {
+			list.removeElement(num);
+		}
+	}
+	//查找操作
+	bool contains(T num) {
+		return list.contains(num);
+	}
+private:
+	LinkedList<T> list;
+};
+
+
+
+//基于二分搜索树的映射
+template <class K, class V>
+class MapBSTNode {
+public:
+	MapBSTNode(K key = NULL, V value = NULL, MapBSTNode<K, V>* left = NULL, MapBSTNode<K, V>* right = NULL) {
+		m_key = key;
+		m_value = value;
+		this->left = left;
+		this->right = right;
+	}
+public:
+	K m_key;
+	V m_value;
+	MapBSTNode<K, V>* left;
+	MapBSTNode<K, V>* right;
+};
+template <class K, class V>
+class MapBST {
+public:
+	MapBST() {
+		root = NULL;
+	}
+	int size() {
+		return m_size;
+	}
+	bool isEmpty() {
+		return root == NULL;
+	}
+	//增加操作
+	void add(K key, V value) {
+		root = add(root, key, value);
+	}
+	//删除操作
+	V remove(K key) {
+		V res = get(key);
+		root = remove(root, key);
+		return res;
+	}
+	//修改操作
+	void set(K key, V value) {
+		MapBSTNode<K, V>* node = root;
+		while (node) {
+			if (key == node->m_key) {
+				node->m_value = value;
+				return;
+			}
+			else if (key < node->m_key) {
+				node = node->left;
+			}
+			else {
+				node = node->right;
+			}
+		}
+		cout << "不存在" << key << '!' << endl;
+		return;
+	}
+	//查找操作
+	V get(K key) {
+		MapBSTNode<K, V>* node = root;
+		while (node) {
+			if (key == node->m_key) {
+				return node->m_value;
+			}
+			else if (key < node->m_key) {
+				node = node->left;
+			}
+			else {
+				node = node->right;
+			}
+		}
+		cout << "不存在" << key << '!' << endl;
+		return NULL;
+	}
+	bool contains(K key) {
+		return contains(root, key);
+	}
+private:
+	MapBSTNode<K, V>* add(MapBSTNode<K, V>* node, K key, V value) {
+		if (node == NULL) {
+			m_size++;
+			return new MapBSTNode<K, V>(key, value);
+		}
+		else if (key < node->m_key) {
+			node->left = add(node->left, key, value);
+		}
+		else if (key > node->m_key) {
+			node->right = add(node->right, key, value);
+		}
+		return node;
+	}
+	MapBSTNode<K, V>* remove(MapBSTNode<K, V>* node, K key) {
+		if (node == NULL) {
+			return node;
+		}
+		if (key < node->m_key) {
+			node->left = remove(node->left, key);
+		}
+		else if (key > node->m_key) {
+			node->right = remove(node->right, key);
+		}
+		else if (key == node->m_key) {
+			if (node->left == NULL) {
+				MapBSTNode<K, V>* rightNode = node->right;
+				delete node;
+				m_size--;
+				return rightNode;
+			}
+			else if (node->right == NULL) {
+				MapBSTNode<K, V>* leftNode = node->left;
+				delete node;
+				m_size--;
+				return leftNode;
+			}
+			else {
+				MapBSTNode<K, V>* minNode = node->right;
+				for (; minNode->left; minNode = minNode->left);
+				node->m_key = minNode->m_key;
+				node->right = remove(node->right, minNode->m_key);
+				return node;
+			}
+		}
+		return node;
+	}
+	bool contains(MapBSTNode<K, V>* node, K key) {
+		if (node == NULL) {
+			return false;
+		}
+		if (key == node->m_key) {
+			return true;
+		}
+		else if (key < node->m_key) {
+			return contains(node->left, key);
+		}
+		else {
+			return contains(node->right, key);
+		}
+	}
+private:
+	MapBSTNode<K, V>* root;
+	int m_size;
+};
+
+template <class K, class V>
+class Map {
+public:
+	virtual int size() = 0;
+	virtual bool isEmpty() = 0;
+	//增加操作
+	virtual void add(K key, V value) = 0;
+	//删除操作
+	virtual V remove(K key) = 0;
+	//修改操作
+	virtual void set(K key, V value) = 0;
+	//查找操作
+	virtual bool contains(K key) = 0;
+	virtual V get(K key) = 0;
+};
+
+template <class K, class V>
+class BSTMap : public Map<K, V> {
+public:
+	int size() {
+		return bst.size();
+	}
+	bool isEmpty() {
+		return bst.isEmpty();
+	}
+	//增加操作
+	void add(K key, V value) {
+		bst.add(key, value);
+	}
+	//删除操作
+	V remove(K key) {
+		return bst.remove(key);
+	}
+	//修改操作
+	void set(K key, V value) {
+		bst.set(key, value);
+	}
+	//查找操作
+	bool contains(K key) {
+		return bst.contains(key);
+	}
+	V get(K key) {
+		return bst.get(key);
+	}
+private:
+	MapBST<K, V> bst;
+};
+
+
+
+//基于链表的映射
+template <class K, class V>
+class MapNode {
+public:
+	MapNode(K key = NULL, V value = NULL, MapNode<K, V>* next = NULL) {
+		m_key = key;
+		m_value = value;
+		this->next = next;
+	}
+public:
+	K m_key;
+	V m_value;
+	MapNode<K, V>* next;
+};
+
+template <class K, class V>
+class LinkedListMap : public Map<K, V> {
+public:
+	LinkedListMap() {
+		head.m_key = NULL;
+		head.m_value = NULL;
+		head.next = NULL;
+		m_size = 0;
+	}
+	int size() {
+		return m_size;
+	}
+	bool isEmpty() {
+		return m_size == 0;
+	}
+	//增加操作
+	void add(K key, V value) {
+		if (!contains(key)) {
+			MapNode<K, V>* p = new MapNode<K, V>(key, value, head.next);
+			head.next = p;
+			m_size++;
+		}
+	}
+	//删除操作
+	V remove(K key) {
+		MapNode<K, V>* pre = &head;
+		MapNode<K, V>* node = pre->next;
+		while (node) {
+			if (key == node->m_key) {
+				pre->next = node->next;
+				V res = node->m_value;
+				delete node;
+				m_size--;
+				return res;
+			}
+			pre = node;
+			node = node->next;
+		}
+		cout << "映射中不包含" << key << '!' << endl;
+		return NULL;
+	}
+	//修改操作
+	void set(K key, V value) {
+		MapNode<K, V>* node = head.next;
+		while (node) {
+			if (key == node->m_key) {
+				node->m_value = value;
+				return;
+			}
+			node = node->next;
+		}
+		cout << "映射中不包含" << key << '!' << endl;
+	}
+	//查找操作
+	bool contains(K key) {
+		MapNode<K, V>* node = head.next;
+		while (node) {
+			if (key == node->m_key) {
+				return true;
+			}
+			node = node->next;
+		}
+		return false;
+	}
+	V get(K key) {
+		MapNode<K, V>* node = head.next;
+		while (node) {
+			if (key == node->m_key) {
+				return node->m_value;
+			}
+			node = node->next;
+		}
+		cout << "映射中不包含" << key << '!' << endl;
+		return NULL;
+	}
+private:
+	MapNode<K, V> head;
+	int m_size;
+};
